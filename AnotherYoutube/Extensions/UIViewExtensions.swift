@@ -20,5 +20,6 @@ extension UIView {
     func clearConstraints() {
         UIView.customConstraints.forEach { $0.isActive = false }
         UIView.customConstraints.removeAll()
-    }    
+    }
+    
 }

@@ -105,10 +105,10 @@ class MainViewController: UIViewController {
         }
     }
     
-    private func launchVideoPlayer() {
+    private func launch(video: Video) {
         //TODO: launch with video url from data model
         let startingFrame = CGRect(x: 0, y: view.frame.height, width: view.frame.width, height: 10)
-        videoPlayerView = VideoPlayerView(frame: startingFrame)
+        videoPlayerView = VideoPlayerView(startingFrame: startingFrame, video: video)
         view.addSubview(videoPlayerView)
     }
     
@@ -131,7 +131,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         closeOtherPlayer()
-        launchVideoPlayer()
+        launch(video: videos[indexPath.row])
         maximizeVideoPlayer()
     }
 }

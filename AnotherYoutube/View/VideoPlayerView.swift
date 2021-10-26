@@ -14,6 +14,8 @@ class VideoPlayerView: UIView {
     let urlString = "https://wolverine.raywenderlich.com/content/ios/tutorials/video_streaming/foxVillage.mp4"
     
     //MARK: - Private Properties
+    private var video: Video?
+    
     private var player = AVPlayer()
     private var playerLayer = AVPlayerLayer()
     
@@ -96,6 +98,53 @@ class VideoPlayerView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    lazy private var titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    lazy private var viewsLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    lazy private var dateLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    lazy private var likeButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "hand.thumbsup")
+        button.setImage(image, for: .normal)
+        button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = .darkGray
+        return button
+    }()
+    lazy private var dislikeButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "hand.thumbsup")
+        button.setImage(image, for: .normal)
+        button.addTarget(self, action: #selector(handleDislike), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = .darkGray
+        button.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
+        return button
+    }()
+    lazy private var likesLabel: UILabel = {
+        let label = UILabel()
+        label.tintColor = .darkGray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    lazy private var dislikesLabel: UILabel = {
+        let label = UILabel()
+        label.tintColor = .darkGray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    lazy private var videoChannelView = VideoChannelView()
     
     //MARK: - Overriden Methods
     override init(frame: CGRect) {
@@ -140,6 +189,14 @@ class VideoPlayerView: UIView {
         }
     }
     
+    //MARK: - Public Methods
+    public init(startingFrame: CGRect, video: Video) {
+        self.video = video
+        super.init(frame: startingFrame)
+        videoChannelView.set(user: video.user)
+        setupView()
+    }
+    
     //MARK: - Private Methods
     private func setupView() {
         backgroundColor = .systemBackground
@@ -150,6 +207,7 @@ class VideoPlayerView: UIView {
         playerContainer.addGestureRecognizer(videoTapGesture)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleClose), name: .closeOther, object: nil)
+  
         setupLayout()
     }
     
@@ -190,6 +248,14 @@ class VideoPlayerView: UIView {
         setCurrentTimeLabel()
         setVideoLengthLabel()
         setFullVideoSlider()
+        setFullTitle()
+        setViews()
+        setDate()
+        setLikeButton()
+        setDislikeButton()
+        setLikesLabel()
+        setDislikesLabel()
+        setVideoChannelView()
     }
     
     private func setMiniConstraints() {
@@ -312,10 +378,99 @@ class VideoPlayerView: UIView {
         activate(constraints: constraints)
     }
     
+    private func setFullTitle() {
+        titleLabel.numberOfLines = 2
+        titleLabel.text = video?.title
+        addSubview(titleLabel)
+        let constraints = [
+            titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
+            titleLabel.topAnchor.constraint(equalTo: playerContainer.bottomAnchor),
+            titleLabel.rightAnchor.constraint(equalTo: rightAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setViews() {
+        //TODO: method do get youtube like views
+        viewsLabel.text = "\(String(video!.viewsNumber)) views "
+        addSubview(viewsLabel)
+        let constraints = [
+            viewsLabel.leftAnchor.constraint(equalTo: titleLabel.leftAnchor),
+            viewsLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDate() {
+        //TODO: mothod to display youtube like date
+        dateLabel.text = "\u{2022} ieri"
+        addSubview(dateLabel)
+        let constraints = [
+            dateLabel.leftAnchor.constraint(equalTo: viewsLabel.rightAnchor),
+            dateLabel.centerYAnchor.constraint(equalTo: viewsLabel.centerYAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setLikeButton() {
+        //TODO: check if video is liked and update button
+        addSubview(likeButton)
+        let constraints = [
+            likeButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 20),
+            likeButton.topAnchor.constraint(equalTo: dateLabel.bottomAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDislikeButton() {
+        //TODO: check if video is disliked and update button
+        addSubview(dislikeButton)
+        let constraints = [
+            dislikeButton.leftAnchor.constraint(equalTo: likeButton.rightAnchor, constant: 20),
+            dislikeButton.centerYAnchor.constraint(equalTo: likeButton.centerYAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setLikesLabel() {
+        //TODO: method to get likes number from model
+        likesLabel.text = "100k"
+        addSubview(likesLabel)
+        let constraints = [
+            likesLabel.topAnchor.constraint(equalTo: likeButton.bottomAnchor),
+            likesLabel.centerXAnchor.constraint(equalTo: likeButton.centerXAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDislikesLabel() {
+        //TODO: method to get likes number from model
+        dislikesLabel.text = "10"
+        addSubview(dislikesLabel)
+        let constraints = [
+            dislikesLabel.topAnchor.constraint(equalTo: dislikeButton.bottomAnchor),
+            dislikesLabel.centerXAnchor.constraint(equalTo: dislikeButton.centerXAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setVideoChannelView() {
+        addSubview(videoChannelView)
+        
+        let constraints = [
+            videoChannelView.topAnchor.constraint(equalTo: dislikesLabel.bottomAnchor),
+            videoChannelView.leftAnchor.constraint(equalTo: leftAnchor),
+            videoChannelView.rightAnchor.constraint(equalTo: rightAnchor),
+            videoChannelView.heightAnchor.constraint(equalToConstant: 50)
+        ]
+        activate(constraints: constraints)
+    }
+    
     @objc private func handleMinimize() {
         isMinimized = true
         clearConstraints()
         hideViews()
+        videoChannelView.isHidden = true
         
         NotificationCenter.default.post(name: .minimize, object: nil)
     }
@@ -343,6 +498,14 @@ class VideoPlayerView: UIView {
         } else {
             showViews()
         }
+    }
+    
+    @objc private func handleLike() {
+        print("Like Like")
+    }
+    
+    @objc private func handleDislike() {
+        print("DIsliked")
     }
     
     @objc func handleSliderChange() {
@@ -388,6 +551,7 @@ class VideoPlayerView: UIView {
         isMinimized = false
         clearConstraints()
         showViews()
+        videoChannelView.isHidden = false
         NotificationCenter.default.post(name: .maximize, object: nil)
     }
 }
