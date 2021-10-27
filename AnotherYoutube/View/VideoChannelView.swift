@@ -22,11 +22,13 @@ class VideoChannelView: UIView {
     }()
     lazy private var channelName: UILabel = {
         let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     lazy private var channelSubscribers: UILabel = {
         let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 12, weight: .light)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -47,7 +49,6 @@ class VideoChannelView: UIView {
         stackView.spacing = 0
         stackView.addArrangedSubview(channelName)
         stackView.addArrangedSubview(channelSubscribers)
-        
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -55,9 +56,7 @@ class VideoChannelView: UIView {
     //MARK: - Overriden Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         translatesAutoresizingMaskIntoConstraints = false
-        
         setupLayout()
     }
     
@@ -95,8 +94,6 @@ class VideoChannelView: UIView {
         addSubview(channelPhoto)
         addSubview(stackView)
         addSubview(subscribeButton)
-        
-        
     }
     
     private func setBorders() {

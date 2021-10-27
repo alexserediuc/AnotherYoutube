@@ -22,7 +22,9 @@ class VideoPlayerView: UIView {
     private var isMinimized = false
     private var isPlaying = false
     
-    private var viewsToHide = [UIView]()
+    private var playerControls = [UIView]()
+    private var otherViewsToHide = [UIView]()
+    
     lazy private var playerContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .black
@@ -36,7 +38,7 @@ class VideoPlayerView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = .white
         button.addTarget(self, action: #selector(handleMinimize), for: .touchUpInside)
-        viewsToHide.append(button)
+        playerControls.append(button)
         return button
     }()
     lazy private var activityIndicatorView: UIActivityIndicatorView = {
@@ -54,7 +56,7 @@ class VideoPlayerView: UIView {
         button.tintColor = .white
         button.isHidden = true
         button.addTarget(self, action: #selector(handlePause), for: .touchUpInside)
-        viewsToHide.append(button)
+        playerControls.append(button)
         return button
     }()
     lazy private var videoLengthLabel: UILabel = {
@@ -64,7 +66,7 @@ class VideoPlayerView: UIView {
         label.textColor = .white
         label.font = UIFont.boldSystemFont(ofSize: 14)
         label.textAlignment = .right
-        viewsToHide.append(label)
+        playerControls.append(label)
         return label
     }()
     lazy private var curretTimelabel: UILabel = {
@@ -73,7 +75,7 @@ class VideoPlayerView: UIView {
         label.text = "00:00"
         label.textColor = .white
         label.font = UIFont.boldSystemFont(ofSize: 14)
-        viewsToHide.append(label)
+        playerControls.append(label)
         return label
     }()
     lazy private var videoSlider: UISlider = {
@@ -85,7 +87,7 @@ class VideoPlayerView: UIView {
         slider.setThumbImage(image, for: .normal)
         slider.thumbTintColor = .red
         slider.addTarget(self, action: #selector(handleSliderChange), for: .valueChanged)
-        viewsToHide.append(slider)
+        playerControls.append(slider)
         return slider
     }()
     lazy private var closeButton: UIButton = {
@@ -105,12 +107,16 @@ class VideoPlayerView: UIView {
     }()
     lazy private var viewsLabel: UILabel = {
         let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
         label.translatesAutoresizingMaskIntoConstraints = false
+        otherViewsToHide.append(label)
         return label
     }()
     lazy private var dateLabel: UILabel = {
         let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
         label.translatesAutoresizingMaskIntoConstraints = false
+        otherViewsToHide.append(label)
         return label
     }()
     lazy private var likeButton: UIButton = {
@@ -120,6 +126,7 @@ class VideoPlayerView: UIView {
         button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = .darkGray
+        otherViewsToHide.append(button)
         return button
     }()
     lazy private var dislikeButton: UIButton = {
@@ -130,26 +137,32 @@ class VideoPlayerView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = .darkGray
         button.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
+        otherViewsToHide.append(button)
         return button
     }()
     lazy private var likesLabel: UILabel = {
         let label = UILabel()
         label.tintColor = .darkGray
         label.translatesAutoresizingMaskIntoConstraints = false
+        otherViewsToHide.append(label)
         return label
     }()
     lazy private var dislikesLabel: UILabel = {
         let label = UILabel()
         label.tintColor = .darkGray
         label.translatesAutoresizingMaskIntoConstraints = false
+        otherViewsToHide.append(label)
         return label
     }()
-    lazy private var videoChannelView = VideoChannelView()
+    lazy private var videoChannelView: VideoChannelView = {
+        let vcv = VideoChannelView()
+        otherViewsToHide.append(vcv)
+        return vcv
+    }()
     
     //MARK: - Overriden Methods
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
     }
     
     required init?(coder: NSCoder) {
@@ -162,6 +175,7 @@ class VideoPlayerView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        print("layout")
         if isMinimized {
             setMiniConstraints()
         } else {
@@ -175,7 +189,7 @@ class VideoPlayerView: UIView {
         //player ready and going
         if keyPath == "currentItem.loadedTimeRanges" {
             activityIndicatorView.stopAnimating()
-            pausePlayButton.isHidden = false
+            //showPlayerControls()
             isPlaying = true
             
             if let duration = player.currentItem?.duration {
@@ -195,25 +209,60 @@ class VideoPlayerView: UIView {
         super.init(frame: startingFrame)
         videoChannelView.set(user: video.user)
         setupView()
+        setupGestures()
     }
     
     //MARK: - Private Methods
     private func setupView() {
         backgroundColor = .systemBackground
         translatesAutoresizingMaskIntoConstraints = false
+        setupLayout()
+    }
+    
+    private func setupGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(sender:)))
         let videoTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleVideoTap(sender:)))
         addGestureRecognizer(tapGesture)
         playerContainer.addGestureRecognizer(videoTapGesture)
-        
         NotificationCenter.default.addObserver(self, selector: #selector(handleClose), name: .closeOther, object: nil)
-  
-        setupLayout()
+        let swipeDownGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeDown))
+        swipeDownGesture.direction = .down
+        addGestureRecognizer(swipeDownGesture)
+        let swipeUpGesture = UISwipeGestureRecognizer(target: self, action: #selector(handSwipeUp))
+        swipeUpGesture.direction = .up
+        addGestureRecognizer(swipeUpGesture)
+    }
+    
+    @objc private func handleSwipeDown(_ gestureRecognizer: UISwipeGestureRecognizer) {
+       handleMinimize()
+    }
+    
+    @objc private func handSwipeUp(_ gestureRecognizer: UISwipeGestureRecognizer) {
+       maximize()
     }
     
     private func setupLayout() {
+        addSubview(playerContainer)
+        addSubview(pausePlayButton)
+        addSubview(closeButton)
+        addSubview(titleLabel)
+        addSubview(viewsLabel)
+        addSubview(dateLabel)
+        addSubview(likeButton)
+        addSubview(dislikeButton)
+        addSubview(likesLabel)
+        addSubview(dislikesLabel)
+        addSubview(videoChannelView)
         setPlayer()
-        showViews()
+        
+        playerContainer.addSubview(minimizeButton)
+        playerContainer.addSubview(activityIndicatorView)
+        playerContainer.addSubview(pausePlayButton)
+        playerContainer.addSubview(curretTimelabel)
+        playerContainer.addSubview(videoLengthLabel)
+        playerContainer.addSubview(videoSlider)
+        hidePlayerControls()
+        
     }
     
     private func setPlayer() {
@@ -222,9 +271,7 @@ class VideoPlayerView: UIView {
             playerLayer = AVPlayerLayer(player: player)
             playerContainer.layer.addSublayer(playerLayer)
             player.play()
-            
             player.addObserver(self, forKeyPath: "currentItem.loadedTimeRanges", options: .new, context: nil)
-            
             let interval = CMTime(value: 1, timescale: 2)
             player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { (progressTime) in
                 let seconds = CMTimeGetSeconds(progressTime)
@@ -267,7 +314,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setFullContainer() {
-        addSubview(playerContainer)
         let constraints = [
             playerContainer.leftAnchor.constraint(equalTo: leftAnchor),
             playerContainer.rightAnchor.constraint(equalTo: rightAnchor),
@@ -278,7 +324,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setMiniContainer() {
-        addSubview(playerContainer)
         let constraints = [
             playerContainer.leftAnchor.constraint(equalTo: leftAnchor),
             playerContainer.topAnchor.constraint(equalTo: topAnchor),
@@ -289,7 +334,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setMinimizeButton() {
-        playerContainer.addSubview(minimizeButton)
         let constraints = [
             minimizeButton.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             minimizeButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 8)
@@ -298,7 +342,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setActivityIndicator() {
-        playerContainer.addSubview(activityIndicatorView)
         let constraints = [
             activityIndicatorView.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor),
             activityIndicatorView.centerXAnchor.constraint(equalTo: playerContainer.centerXAnchor)
@@ -308,7 +351,6 @@ class VideoPlayerView: UIView {
     
     private func setFullPausePlayButton() {
         pausePlayButton.tintColor = .white
-        playerContainer.addSubview(pausePlayButton)
         let constraints = [
             pausePlayButton.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor),
             pausePlayButton.centerXAnchor.constraint(equalTo: playerContainer.centerXAnchor)
@@ -317,7 +359,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setCurrentTimeLabel() {
-        playerContainer.addSubview(curretTimelabel)
         let constraints = [
             curretTimelabel.leftAnchor.constraint(equalTo: playerContainer.leftAnchor, constant: 8),
             curretTimelabel.bottomAnchor.constraint(equalTo: playerContainer.bottomAnchor)
@@ -326,7 +367,6 @@ class VideoPlayerView: UIView {
     }
     
     private func setVideoLengthLabel() {
-        playerContainer.addSubview(videoLengthLabel)
         let constraints = [
             videoLengthLabel.rightAnchor.constraint(equalTo: playerContainer.rightAnchor, constant: -8),
             videoLengthLabel.centerYAnchor.constraint(equalTo: curretTimelabel.centerYAnchor)
@@ -337,7 +377,6 @@ class VideoPlayerView: UIView {
     private func setFullVideoSlider() {
         videoSlider.setThumbImage(UIImage(named: "circle.fill"), for: .normal)
         videoSlider.thumbTintColor = .red
-        playerContainer.addSubview(videoSlider)
         let constraints = [
             videoSlider.leftAnchor.constraint(equalTo: curretTimelabel.rightAnchor),
             videoSlider.rightAnchor.constraint(equalTo: videoLengthLabel.leftAnchor),
@@ -359,8 +398,8 @@ class VideoPlayerView: UIView {
     }
     
     private func setMiniPausePlayButton() {
-        pausePlayButton.isHidden = false
         pausePlayButton.tintColor = .darkGray
+        //it must be added here because subview changes
         addSubview(pausePlayButton)
         let constraints = [
             pausePlayButton.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor),
@@ -371,7 +410,6 @@ class VideoPlayerView: UIView {
     
     private func setCloseButton() {
         closeButton.isHidden = false
-        addSubview(closeButton)
         let constraints = [
             closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -8),
             closeButton.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor)
@@ -382,11 +420,69 @@ class VideoPlayerView: UIView {
     private func setFullTitle() {
         titleLabel.numberOfLines = 2
         titleLabel.text = video?.title
-        addSubview(titleLabel)
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         let constraints = [
             titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
-            titleLabel.topAnchor.constraint(equalTo: playerContainer.bottomAnchor),
+            titleLabel.topAnchor.constraint(equalTo: playerContainer.bottomAnchor, constant: 8),
             titleLabel.rightAnchor.constraint(equalTo: rightAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setViews() {
+        //TODO: method do get youtube like views
+        viewsLabel.text = "\(String(video!.viewsNumber)) views "
+        let constraints = [
+            viewsLabel.leftAnchor.constraint(equalTo: titleLabel.leftAnchor),
+            viewsLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDate() {
+        //TODO: mothod to display youtube like date
+        dateLabel.text = "\u{2022} ieri"
+        let constraints = [
+            dateLabel.leftAnchor.constraint(equalTo: viewsLabel.rightAnchor),
+            dateLabel.centerYAnchor.constraint(equalTo: viewsLabel.centerYAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setLikeButton() {
+        //TODO: check if video is liked and update button
+        let constraints = [
+            likeButton.centerXAnchor.constraint(equalTo: likesLabel.centerXAnchor),
+            likeButton.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 8)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDislikeButton() {
+        //TODO: check if video is disliked and update button
+        let constraints = [
+            dislikeButton.leftAnchor.constraint(equalTo: likeButton.rightAnchor, constant: 20),
+            dislikeButton.centerYAnchor.constraint(equalTo: likeButton.centerYAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setLikesLabel() {
+        //TODO: method to get likes number from model
+        likesLabel.text = "100k"
+        let constraints = [
+            likesLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
+            likesLabel.topAnchor.constraint(equalTo: likeButton.bottomAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setDislikesLabel() {
+        //TODO: method to get likes number from model
+        dislikesLabel.text = "10"
+        let constraints = [
+            dislikesLabel.topAnchor.constraint(equalTo: dislikeButton.bottomAnchor),
+            dislikesLabel.centerXAnchor.constraint(equalTo: dislikeButton.centerXAnchor)
         ]
         activate(constraints: constraints)
     }
@@ -401,75 +497,9 @@ class VideoPlayerView: UIView {
         activate(constraints: constraints)
     }
     
-    private func setViews() {
-        //TODO: method do get youtube like views
-        viewsLabel.text = "\(String(video!.viewsNumber)) views "
-        addSubview(viewsLabel)
-        let constraints = [
-            viewsLabel.leftAnchor.constraint(equalTo: titleLabel.leftAnchor),
-            viewsLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
-    private func setDate() {
-        //TODO: mothod to display youtube like date
-        dateLabel.text = "\u{2022} ieri"
-        addSubview(dateLabel)
-        let constraints = [
-            dateLabel.leftAnchor.constraint(equalTo: viewsLabel.rightAnchor),
-            dateLabel.centerYAnchor.constraint(equalTo: viewsLabel.centerYAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
-    private func setLikeButton() {
-        //TODO: check if video is liked and update button
-        addSubview(likeButton)
-        let constraints = [
-            likeButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 20),
-            likeButton.topAnchor.constraint(equalTo: dateLabel.bottomAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
-    private func setDislikeButton() {
-        //TODO: check if video is disliked and update button
-        addSubview(dislikeButton)
-        let constraints = [
-            dislikeButton.leftAnchor.constraint(equalTo: likeButton.rightAnchor, constant: 20),
-            dislikeButton.centerYAnchor.constraint(equalTo: likeButton.centerYAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
-    private func setLikesLabel() {
-        //TODO: method to get likes number from model
-        likesLabel.text = "100k"
-        addSubview(likesLabel)
-        let constraints = [
-            likesLabel.topAnchor.constraint(equalTo: likeButton.bottomAnchor),
-            likesLabel.centerXAnchor.constraint(equalTo: likeButton.centerXAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
-    private func setDislikesLabel() {
-        //TODO: method to get likes number from model
-        dislikesLabel.text = "10"
-        addSubview(dislikesLabel)
-        let constraints = [
-            dislikesLabel.topAnchor.constraint(equalTo: dislikeButton.bottomAnchor),
-            dislikesLabel.centerXAnchor.constraint(equalTo: dislikeButton.centerXAnchor)
-        ]
-        activate(constraints: constraints)
-    }
-    
     private func setVideoChannelView() {
-        addSubview(videoChannelView)
-        
         let constraints = [
-            videoChannelView.topAnchor.constraint(equalTo: dislikesLabel.bottomAnchor),
+            videoChannelView.topAnchor.constraint(equalTo: dislikesLabel.bottomAnchor, constant: 8),
             videoChannelView.leftAnchor.constraint(equalTo: leftAnchor),
             videoChannelView.rightAnchor.constraint(equalTo: rightAnchor),
             videoChannelView.heightAnchor.constraint(equalToConstant: 50)
@@ -480,9 +510,8 @@ class VideoPlayerView: UIView {
     @objc private func handleMinimize() {
         isMinimized = true
         clearConstraints()
-        hideViews()
-        videoChannelView.isHidden = true
-        
+        hidePlayerControls()
+        hideOtherViews()
         NotificationCenter.default.post(name: .minimize, object: nil)
     }
     
@@ -507,7 +536,7 @@ class VideoPlayerView: UIView {
         if isMinimized {
             maximize()
         } else {
-            showViews()
+            showPlayerControls()
         }
     }
     
@@ -538,8 +567,8 @@ class VideoPlayerView: UIView {
         NotificationCenter.default.post(name: .close, object: nil)
     }
     
-    private func hideViews() {
-        for v in viewsToHide {
+    private func hidePlayerControls() {
+        for v in playerControls {
             v.isHidden = true
         }
         if isMinimized {
@@ -548,21 +577,35 @@ class VideoPlayerView: UIView {
         }
     }
     
-    private func showViews() {
-        for v in viewsToHide {
-            v.isHidden = false
+    private func showPlayerControls() {
+        if !isMinimized {
+            for v in playerControls {
+                v.isHidden = false
+            }
+            closeButton.isHidden = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.hidePlayerControls()
+            }
         }
-        closeButton.isHidden = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.hideViews()
+    }
+    
+    private func hideOtherViews() {
+        for v in otherViewsToHide {
+            v.isHidden = true
+        }
+    }
+    
+    private func showOtherViews() {
+        for v in otherViewsToHide {
+            v.isHidden = false
         }
     }
     
     private func maximize() {
         isMinimized = false
         clearConstraints()
-        showViews()
-        videoChannelView.isHidden = false
+        showPlayerControls()
+        showOtherViews()
         NotificationCenter.default.post(name: .maximize, object: nil)
     }
 }
