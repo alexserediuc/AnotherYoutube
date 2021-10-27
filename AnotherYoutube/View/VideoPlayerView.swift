@@ -262,6 +262,7 @@ class VideoPlayerView: UIView {
         setMiniContainer()
         setMiniVideoSlider()
         setCloseButton()
+        setMiniTitle()
         setMiniPausePlayButton()
     }
     
@@ -362,8 +363,8 @@ class VideoPlayerView: UIView {
         pausePlayButton.tintColor = .darkGray
         addSubview(pausePlayButton)
         let constraints = [
-            pausePlayButton.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: -8),
-            pausePlayButton.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor)
+            pausePlayButton.centerYAnchor.constraint(equalTo: playerContainer.centerYAnchor),
+            pausePlayButton.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: -8)
         ]
         activate(constraints: constraints)
     }
@@ -386,6 +387,16 @@ class VideoPlayerView: UIView {
             titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
             titleLabel.topAnchor.constraint(equalTo: playerContainer.bottomAnchor),
             titleLabel.rightAnchor.constraint(equalTo: rightAnchor)
+        ]
+        activate(constraints: constraints)
+    }
+    
+    private func setMiniTitle() {
+        titleLabel.numberOfLines = 0
+        let constraints = [
+            titleLabel.leftAnchor.constraint(equalTo: playerContainer.rightAnchor, constant: 8),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            titleLabel.rightAnchor.constraint(equalTo: pausePlayButton.leftAnchor)
         ]
         activate(constraints: constraints)
     }
