@@ -12,4 +12,5 @@ extension Notification.Name {
     static let maximize = Notification.Name("maximize")
     static let close = Notification.Name("close")
     static let closeOther = Notification.Name("closeOther")
+    static let extendComments = Notification.Name("extendComments")
 }

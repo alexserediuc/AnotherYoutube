@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CommentView" customModule="AnotherYoutube" customModuleProvider="target">
+            <connections>
+                <outlet property="commentLabel" destination="Mk4-dw-DZR" id="ODe-yL-8D4"/>
+                <outlet property="commentsNumbersLabel" destination="eZ4-bN-4JC" id="yOf-rb-Xzc"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="500" height="172"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Comments" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dD6-gU-wFw">
+                    <rect key="frame" x="8" y="0.0" width="83" height="21"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZ4-bN-4JC">
+                    <rect key="frame" x="99" y="0.0" width="29" height="21"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Commet bla bla bla..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mk4-dw-DZR">
+                    <rect key="frame" x="36" y="29" width="120" height="14.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="person.circle" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="mQD-vk-QRC">
+                    <rect key="frame" x="8" y="29.5" width="20" height="19"/>
+                    <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="rectangle.expand.vertical" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="IEF-Jy-Xq7">
+                    <rect key="frame" x="469" y="-1" width="23" height="22"/>
+                    <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </imageView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="eZ4-bN-4JC" firstAttribute="centerY" secondItem="dD6-gU-wFw" secondAttribute="centerY" id="0Ef-zs-u5K"/>
+                <constraint firstAttribute="trailing" secondItem="IEF-Jy-Xq7" secondAttribute="trailing" constant="8" id="3fB-ZY-Afw"/>
+                <constraint firstItem="eZ4-bN-4JC" firstAttribute="leading" secondItem="dD6-gU-wFw" secondAttribute="trailing" constant="8" symbolic="YES" id="5Ih-wT-Io8"/>
+                <constraint firstItem="Mk4-dw-DZR" firstAttribute="leading" secondItem="mQD-vk-QRC" secondAttribute="trailing" constant="8" symbolic="YES" id="Fht-0z-46s"/>
+                <constraint firstItem="IEF-Jy-Xq7" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="SLH-RS-hYV"/>
+                <constraint firstItem="dD6-gU-wFw" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="ap3-8h-Xgi"/>
+                <constraint firstItem="mQD-vk-QRC" firstAttribute="top" secondItem="dD6-gU-wFw" secondAttribute="bottom" constant="8" id="c9r-gg-Adc"/>
+                <constraint firstItem="dD6-gU-wFw" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="hVa-Hu-xIS"/>
+                <constraint firstItem="mQD-vk-QRC" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="8" id="l4m-qR-TYJ"/>
+                <constraint firstItem="Mk4-dw-DZR" firstAttribute="top" secondItem="dD6-gU-wFw" secondAttribute="bottom" constant="8" id="uer-Yz-7FR"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="160.86956521739131" y="223.66071428571428"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="person.circle" catalog="system" width="128" height="121"/>
+        <image name="rectangle.expand.vertical" catalog="system" width="128" height="122"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

@@ -159,6 +159,12 @@ class VideoPlayerView: UIView {
         otherViewsToHide.append(vcv)
         return vcv
     }()
+    lazy private var commentView: CommentView = {
+        let cv = CommentView()
+        otherViewsToHide.append(cv)
+        return cv
+    }()
+    lazy private var commentsListView = CommentsListView()
     
     //MARK: - Overriden Methods
     override init(frame: CGRect) {
@@ -208,8 +214,28 @@ class VideoPlayerView: UIView {
         self.video = video
         super.init(frame: startingFrame)
         videoChannelView.set(user: video.user)
+        commentView = CommentView(commentsNumber: "100k", comment: "Un com acolo")
         setupView()
         setupGestures()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(extendComments), name: .extendComments, object: nil)
+    }
+    
+    @objc private func extendComments() {
+        print("extend comments")
+        
+        commentsListView = CommentsListView(with: fetchDummyComments())
+        addSubview(commentsListView)
+        let constraints = [
+            commentsListView.topAnchor.constraint(equalTo: playerContainer.bottomAnchor),
+            commentsListView.leftAnchor.constraint(equalTo: leftAnchor),
+            commentsListView.rightAnchor.constraint(equalTo: rightAnchor),
+            commentsListView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ]
+        activate(constraints: constraints)
+        UIView.animate(withDuration: 1, delay: 0, options: .curveEaseOut) {
+            self.layoutIfNeeded()
+        }
     }
     
     //MARK: - Private Methods
@@ -234,11 +260,11 @@ class VideoPlayerView: UIView {
     }
     
     @objc private func handleSwipeDown(_ gestureRecognizer: UISwipeGestureRecognizer) {
-       handleMinimize()
+        handleMinimize()
     }
     
     @objc private func handSwipeUp(_ gestureRecognizer: UISwipeGestureRecognizer) {
-       maximize()
+        maximize()
     }
     
     private func setupLayout() {
@@ -253,6 +279,7 @@ class VideoPlayerView: UIView {
         addSubview(likesLabel)
         addSubview(dislikesLabel)
         addSubview(videoChannelView)
+        addSubview(commentView)
         setPlayer()
         
         playerContainer.addSubview(minimizeButton)
@@ -303,6 +330,7 @@ class VideoPlayerView: UIView {
         setLikesLabel()
         setDislikesLabel()
         setVideoChannelView()
+        setCommentsView()
     }
     
     private func setMiniConstraints() {
@@ -507,6 +535,16 @@ class VideoPlayerView: UIView {
         activate(constraints: constraints)
     }
     
+    private func setCommentsView() {
+        let constraints = [
+            commentView.topAnchor.constraint(equalTo: videoChannelView.bottomAnchor, constant: 8),
+            commentView.leftAnchor.constraint(equalTo: leftAnchor),
+            commentView.rightAnchor.constraint(equalTo: rightAnchor),
+            commentView.heightAnchor.constraint(equalToConstant: 50)
+        ]
+        activate(constraints: constraints)
+    }
+    
     @objc private func handleMinimize() {
         isMinimized = true
         clearConstraints()
@@ -607,5 +645,15 @@ class VideoPlayerView: UIView {
         showPlayerControls()
         showOtherViews()
         NotificationCenter.default.post(name: .maximize, object: nil)
+    }
+}
+
+extension VideoPlayerView {
+    private func fetchDummyComments() -> [Comment] {
+        let user = User(uid: "123", username: "Georgel")
+        let comment1 = Comment(user: user, content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+        let comment2 = Comment(user: user, content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus nunc leo, efficitur vitae tempus in, elementum ac nulla. In ullamcorper ipsum vitae ex tempor, ac sodales est ultricies. ")
+        
+        return [comment1, comment2]
     }
 }

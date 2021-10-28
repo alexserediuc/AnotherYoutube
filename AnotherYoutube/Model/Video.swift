@@ -13,5 +13,5 @@ struct Video {
     var viewsNumber: Int
     var uploadDate: Date
     var user: User
-    
 }
+
